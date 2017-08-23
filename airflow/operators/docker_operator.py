@@ -94,6 +94,9 @@ class DockerOperator(BaseOperator):
             force_pull=False,
             mem_limit=None,
             network_mode=None,
+            registry_username=None,
+            registry_password=None,
+            registry_url=None,
             tls_ca_cert=None,
             tls_client_cert=None,
             tls_client_key=None,
@@ -118,6 +121,9 @@ class DockerOperator(BaseOperator):
         self.image = image
         self.mem_limit = mem_limit
         self.network_mode = network_mode
+        self.registry_username = registry_username
+        self.registry_password = registry_password
+        self.registry_url = registry_url
         self.tls_ca_cert = tls_ca_cert
         self.tls_client_cert = tls_client_cert
         self.tls_client_key = tls_client_key
@@ -148,6 +154,10 @@ class DockerOperator(BaseOperator):
             self.docker_url = self.docker_url.replace('tcp://', 'https://')
 
         self.cli = Client(base_url=self.docker_url, version=self.api_version, tls=tls_config)
+
+        if self.registry_url:
+            self.cli.login(username=self.registry_username, password=self.registry_password, registry=self.registry_url,
+                           reauth=True)
 
         if ':' not in self.image:
             image = self.image + ':latest'
