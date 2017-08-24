@@ -14,6 +14,7 @@
 
 import logging
 import os
+import re
 
 from airflow import configuration as conf
 from airflow.configuration import AirflowConfigException
@@ -84,9 +85,10 @@ class FileTaskHandler(logging.Handler):
             except Exception as e:
                 log = "*** Failed to load local log file: {}. {}\n".format(loc, str(e))
         else:
-            url = os.path.join("http://{ti.hostname}:{worker_log_server_port}/log",
+            hostname =  re.sub(r'-\d-\w{5}','',ti.hostname)
+            url = os.path.join("http://{hostname}:{worker_log_server_port}/log",
                                log_relative_path).format(
-                ti=ti,
+                hostname=hostname,
                 worker_log_server_port=conf.get('celery', 'WORKER_LOG_SERVER_PORT'))
             log += "*** Log file isn't local.\n"
             log += "*** Fetching here: {url}\n".format(**locals())
